@@ -40,7 +40,7 @@ if (-Not($Java_Executable)){ # If you don't set anything up there (by default), 
 
     $Temurin = (Get-Command temurin17-javaw.exe -Ea Ignore).Source | Sort-Object -Descending | Select-Object -Last 1
     $GraalVM = Convert-Path "$env:ProgramData\GraalVM\bin\javaw.exe" -ErrorAction Ignore
-    $Zulu = Convert-Path "$env:USERPROFILE\.lunarclient\jre\zulu*-jre*-win_x*\bin\javaw.exe" | Sort-Object -Descending | Select-Object -Last 1
+    $Zulu = Convert-Path "$env:USERPROFILE\.lunarclient\jre\zulu*-jre*-win_x*\bin\javaw.exe" -Ea Ignore | Sort-Object -Descending | Select-Object -Last 1
     $FallbackJRE = (Get-Command javaw.exe -Ea Ignore).Source | Sort-Object -Descending | Select-Object -First 1
 
     if ($Temurin){$Java_Executable = $Temurin}
@@ -85,6 +85,8 @@ You have two options:
 - Launch Lunar Client and let it download Zulu
 - Open up launcher.ps1 and manually set the JRE's path, in the JRE's bin folder, select java.exe if you wish to console, or javaw.exe if you don't
 "@
+pause
+exit
     }
 }
     }
