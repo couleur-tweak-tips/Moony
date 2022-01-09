@@ -1,57 +1,60 @@
 param([float]$ver,[string]$ip)
-    # Parses the given settings & version then launches Lunar Client
-    # It is recommended you tune the most common setting which I've regrouped at the start for your convenience
 
-$DedicatedGigaBytesOfRam = 2.5
+$script:settings = @{
+
+    DedicatedGigaBytesOfRam = 2.5
     # You likely won't need more, unless you're gonna play in big maps with a shit ton of mods (Default: 2.5)
 
-$WindowedHeight = 480
-$WindowedWidth = 854
+    WindowedHeight = 480
+    WindowedWidth = 854
     # This will only affect Windowed resolution (Default: 480,854)
 
-$LunarClientCosmetics = $false
-    # Set this to $false to completly disable Lunar's cosmetics
+    LunarClientCosmetics = $false
+    # Set this to false to completly disable Lunar's cosmetics
     # I have no idea what it's effect is if you are using LCProxy / Solar Tweaks
 
-$LCDirectory = "$env:USERPROFILE\.lunarclient"
-$MinecraftDir = "$env:APPDATA\.minecraft"
+    LCDirectory = "$env:USERPROFILE\.lunarclient"
+    MinecraftDir = "$env:APPDATA\.minecraft"
     # If you're using a custom Minecraft directory, make sure it has an asset folder, else it'll fail to load the textures
     # You can copy your asset folder from one of your default Minecraft directory
 
-$Java_Executable = ""
+    Java_Executable = ""
     # Feel free to put a path to your JRE here (it'll automatic detect GraalVM in ProgramData/LC's Zulu of you don't set anything)
-    # Remember to surround it by single or double quotes
+    # Remember to surround it by single/double quotes
+
+}
 
 $JVM_Arguments = @(
 
-   # '-XX:+UseZGC'
-        # Try removing that if your Minecraft tends to freeze / crash, this is an optimized garbage collector
+    '-XX:+UseZGC'
+    # Try removing that if your Minecraft tends to freeze / crash, this is an optimized garbage collector
 
-    "-Xms$($DedicatedGigaBytesOfRam*1024)m"
-    "-Xmx$($DedicatedGigaBytesOfRam*1024)m"
+    "-Xms$($settings.DedicatedGigaBytesOfRam*1024)m"
+    "-Xmx$($settings.DedicatedGigaBytesOfRam*1024)m"
     '-XX:+DisableAttachMechanism'
-    "-Djava.library.path=$(Join-Path $LCDirectory offline\$ver\natives) " # This needs to be in here for some reason
+    "-Djava.library.path=$(Join-Path $settings.LCDirectory offline\$ver\natives) " # This needs to be in here for some reason
         
-    # You can find GraalVM specific args later down
 
 ) -join ' '
+    # If the JRE path contains 'GraalVM', it'll append extra JVM arguments which you can find later down
 
-if (-Not($Java_Executable)){ # If you don't set anything up there (by default), this'll find one for you
+
+if (-Not($settings.Java_Executable)){ # If you don't set anything up there (by default), this'll find one for you
 
     $Temurin = (Get-Command temurin17-javaw.exe -Ea Ignore).Source | Sort-Object -Descending | Select-Object -Last 1
     $GraalVM = Convert-Path "$env:ProgramData\GraalVM\bin\javaw.exe" -ErrorAction Ignore
     $Zulu = Convert-Path "$env:USERPROFILE\.lunarclient\jre\zulu*-jre*-win_x*\bin\javaw.exe" -Ea Ignore | Sort-Object -Descending | Select-Object -Last 1
     $FallbackJRE = (Get-Command javaw.exe -Ea Ignore).Source | Sort-Object -Descending | Select-Object -First 1
 
-    if ($Temurin){$Java_Executable = $Temurin}
-    elseif ($GraalVM){$Java_Executable = $GraalVM}
-    elseif($Zulu){$Java_Executable = $Zulu}
-    elseif ($FallbackJRE){$Java_Executable = $FallbackJRE
+    if ($Temurin){$settings.Java_Executable = $Temurin}
+    elseif ($GraalVM){$settings.Java_Executable = $GraalVM}
+    elseif($Zulu){$settings.Java_Executable = $Zulu}
+    elseif ($FallbackJRE){$settings.Java_Executable = $FallbackJRE
 
 @"
 Could not find Lunar Client's java executable, using javaw.exe from path (may fail)
 
-Will use the following JRE: $Javaw_Executable
+Will use the following JRE: $($settings.Javaw_Executable)
 "@
             
             
@@ -94,9 +97,9 @@ exit
 }
 
 
-if ($Java_Executable -like "*GraalVM*"){ # Appends these JVM arguments only if path contains 'GraalVM'
+if ($settings.Java_Executable -like "*GraalVM*"){ # Appends these JVM arguments only if path contains 'GraalVM'
 
-    $JVM_Arguments += @(
+    $settings.JVM_Arguments += @(
 
         # Put your GraalVM related JVM Args here
         
@@ -143,33 +146,33 @@ $jars = @(
 
 ) -join ';'
 
-if ($LunarClientCosmetics){
+if ($settings.LunarClientCosmetics){
 
-    $texturesDir = $(Join-Path $LCDirectory textures)
+    $texturesDir = Join-Path $settings.LCDirectory textures
 
 }else{
     $texturesDir = "`"`""
 }
 
-if(-Not($WindowedHeight)){$WindowedHeight = 480}
-if(-Not($WindowedWidth)){$WindowedWidth = 854}
+if(-Not($settings.WindowedHeight)){$settings.WindowedHeight = 480}
+if(-Not($settings.WindowedWidth)){$settings.WindowedWidth = 854}
 
 
-$settings = @(
+$config = @(
 'com.moonsworth.lunar.patcher.LunarMain'
 "--version $ver"
 '--accessToken 0'
 "--assetIndex $version"
 '--userProperties {}'
-"--gameDir $MinecraftDir"
+"--gameDir $($settings.MinecraftDir)"
 "--texturesDir $texturesDir"
-"--assetDir $(Join-Path $MinecraftDir assets)"
-"--width $WindowedWidth"
-"--height $WindowedHeight"
+"--assetDir $(Join-Path $settings.MinecraftDir assets)"
+"--width $($settings.WindowedWidth)"
+"--height $($settings.WindowedHeight)"
 )
 
 if ($ip){
-    $settings += "-server $ip" 
+    $config += "-server $ip" 
 }
 
 <# If you wish to add --hwid and --launcherversion:
@@ -179,69 +182,19 @@ You can parse them by launching Lunar Client with the official Launcher and typi
 (Get-WmiObject Win32_Process -Filter "name = 'javaw.exe'").CommandLine.Split(' ') | Select-Object -Last 8
 
 #>
-$Arguments = @($libraries;$JVM_Arguments;$natives;$jars;$settings) -join ' '
 
-# Set-Clipboard "$Java_Executable $Arguments"
+$Parameters = @{
 
+    FilePath = $settings.Java_Executable
+    WorkingDirectory = Join-Path $settings.LCDirectory offline/$ver
+        # Makes it so we don't have to specify a path for each file in $jars
 
-Start-Process "$Java_Executable" -WorkingDirectory $(Join-Path $LCDirectory offline/$ver) -ArgumentList "$Arguments" -Verbose -NoNewWindow
+    ArgumentList = @($libraries;$JVM_Arguments;$natives;$jars;$config) -join ' '
+    NoNewWindow = $true
+}
+if ($Verbose){$Parameters | Format-Table}
+
+Start-Process @Parameters
 
 Start-Sleep 10
 exit
-<#
-$offline = "$HOME\.lunarclient\offline"
-$MCDir = "D:\Scoop\Minecraft\1.7-1.8"
-$Ver = "1.7"
-$Version = "1.7.10"
-
-$Java_Executable = "D:\Scoop\Java Runtime Environments\graalvm-ce-java17-21.3.0\bin\javaw.exe"
-
-$libraries = @(
-'--add-modules jdk.naming.dns'
-'--add-exports jdk.naming.dns/com.sun.jndi.dns=java.naming'
-"-Djna.boot.library.path=$offline\$ver\natives"
-'--add-opens java.base/java.io=ALL-UNNAMED'
-) -join ' '
-
-$JVM_Arguments = @(
-'-Xms3G'
-'-Xmx3G'
-'-XX:+DisableAttachMechanism'
-'-XX:+UnlockExperimentalVMOptions'
-'-XX:+UseZGC'
-'-XX:MaxGCPauseMillis=50'
-
-# GraalVM specific
-'-XX:+EnableJVMCI'
-'-XX:+UseJVMCICompiler'
-'-XX:+EagerJVMCI'
-'-Djvmci.Compiler=graal'
-) -join ' '
-
-$natives = "-Djava.library.path=$offline\$ver\natives"
-
-$jars = @(
-"-cp $offline\1.7\lunar-assets-prod-1-optifine.jar"
-"$offline\1.7\lunar-assets-prod-2-optifine.jar"
-"$offline\1.7\lunar-assets-prod-3-optifine.jar"
-"$offline\1.7\lunar-libs.jar"
-"$offline\1.7\lunar-prod-optifine.jar"
-"$offline\1.7\OptiFine.jar"
-"$offline\1.7\vpatcher-prod.jar com.moonsworth.lunar.patcher.LunarMain"
-) -join ';'
-
-$settings = @(
-"--version $ver"
-'--accessToken 0'
-"--assetIndex $version"
-'--userProperties {}'
-"--gameDir $MCDir"
-'--width 854'
-'--height 480'
-'--texturesDir " "'
-"--assetsDir $(Join-Path $MCDir assets)"
-) -join ' '
-
-Start-Process "$Java_Executable" -ArgumentList "$libraries $JVM_arguments $natives $jars $settings"
-#"$Java_Executable $libraries $JVM_arguments $natives $jars $settings"
-#>
