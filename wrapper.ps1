@@ -52,6 +52,12 @@ switch ($args[1]){ # Argument 2: Server IP
 
 }
 
+if (($args | Select-Object -Last 1) -eq '-Verbose'){
+    $VerbosePreference = 'Continue'
+    $script:Verbose = $true
+    $null = $args | Select-Object -Last 1
+}
+
 if($args[2]){
 
     $file = "$env:USERPROFILE\.lunarclient\settings\game\accounts.json"
@@ -77,5 +83,7 @@ if($args[2]){
     }
 }
 
-Write-Verbose "Passing $ver;$server" -Verbose
+Write-Host "Launching Lunar Client version $ver$(if ($server){", joining server $server"})$(if ($args[2]){" and switching to account $($args[2])"})" -ForegroundColor Green
+''
+
 & "$PSScriptRoot\launcher.ps1" $ver $server
