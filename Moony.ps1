@@ -256,12 +256,12 @@ if ($settings.Java_Executable -like "*GraalVM*"){ # Appends these JVM arguments 
 
 switch ($ver){
     1.7{Set-Variable -Name version -Value 1.7.10}
-    1.8{Set-Variable -Name version -Value 1.8.9}
-    1.12{Set-Variable -Name version -Value 1.12.2}
-    1.16{Set-Variable -Name version -Value 1.16.5}
-    1.17{Set-Variable -Name version -Value 1.17.1}
-    1.18{Set-Variable -Name version -Value 1.18.1}
-    default{Write-Warning "Uknown version provided: $ver"
+    1.8{Set-Variable -Name version -Value 1.8}
+    1.12{Set-Variable -Name version -Value 1.12}
+    1.16{Set-Variable -Name version -Value 1.16}
+    1.17{Set-Variable -Name version -Value 1.17}
+    1.18{Set-Variable -Name version -Value 1.18}
+    default{Write-Warning "Unknown version provided: $ver"
     pause
     exit}
 }
