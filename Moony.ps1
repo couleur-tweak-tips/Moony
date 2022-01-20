@@ -255,6 +255,7 @@ if ($settings.Java_Executable -like "*GraalVM*"){ # Appends these JVM arguments 
 }
 
 switch ($ver){
+    # Fix Asset Index
     1.7{Set-Variable -Name version -Value 1.7.10}
     1.8{Set-Variable -Name version -Value 1.8}
     1.12{Set-Variable -Name version -Value 1.12}
