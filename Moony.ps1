@@ -357,7 +357,7 @@ if ($Verbose){
     $config
 }
 
-Start-Process @Parameters -Verbose
+Start-Process @Parameters
 
 Start-Sleep 10
 exit
