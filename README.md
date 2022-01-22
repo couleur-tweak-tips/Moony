@@ -4,11 +4,11 @@
 * Choose the version directly, no need to launch then have to ``Click to view launch options``
 * Select a server that will be joined automatically when Minecraft finishes launching
 * Select an account to switch to at launch
-* Doesn't get in your way, you can type your command and go back to whatever you were doing while it launches
+* Doesn't get in your way, you can type your command and go back to whatever you were doing while waiting for it to finish launching
 ### 🔓**Unlocked features**
-* You get to choose when to update, (e.g a controversial update happens) Lunar Client's official launcher phones home every time you launch it
-* Make Minecraft significantly more stable (1.8+) with a custom JRE (GraalVM, learn more at [CTT](http://dsc.gg/CTT))
-* Make your own shortened version/server/account combos to quickly (e.g you could make typing `mn MyPreset` launch 1.8, join eu.minemen.club on account MyPvPAlt123 )
+* You get to choose when to update, (e.g a controversial update happens that removes your favorite feature), unlike Lunar Client's official launcher which phones home every time you launch it
+* Make Minecraft significantly more stable (1.8+) with a custom JRE (GraalVM, learn more in [CTT](http://dsc.gg/CTT))
+* Make your own shortened version/server/account combos to quickly launch Moony (e.g you could make typing `mn MyPreset` launch 1.8, join eu.minemen.club on account MyPvPAlt123)
 * Completly strip out every cosmetics ([lmk](https://t.me/Couleur) if you know a way for emotes)
 
 # ⌨️ Using Moony
@@ -20,7 +20,6 @@ I made it very flexible so you can either type full server IPs / versions or jus
 ```
 mn <version> <server> <account> [-Verbose]
 ```
- You can type shortened 
 
  There's also a few utilities like 'edit' to open up the script to tune it and 'stop' to kill javaw
 ```
@@ -40,15 +39,13 @@ mn edit
 ```
 mn MyPreset
 ```
- If you take a second to tune the script, you can set a custom version, server and account as a preset and call it from the Run window
-
-Also if you are a CLI lover I made it so you can also call it from the command line (s/o minimoony <3)
+ If you take a second to tune the script, you can set a custom version, server and account as a preset and call it from the Run window.
 
 # 🥄 Installation
 
 I recommend using installing scoop and adding my bucket by pasting the commands down below in a PowerShell window:
 
-This will make automatically add the shortcuts to path and let you update Moony by sending a single command.
+This will make automatically add the shortcuts to path and let you update Moony by sending a single [command](#-updating).
 
 ### \# Install scoop:
 ```powershell
@@ -65,7 +62,7 @@ scoop install main/git
 ```
 scoop bucket add utils https://github.com/couleur-tweak-tips/utils
 ```
-### \# Install Moony
+### \# Install [Moony](https://github.com/couleur-tweak-tips/utils/blob/main/bucket/Moony.json)
 ```
 scoop install utils/moony
 ```
@@ -77,4 +74,4 @@ scoop install utils/moony
 scoop.cmd update utils/moony
 ```
 
-(For fiddlers: feel free to download [Moony.ps1](https://github.com/couleur-tweak-tips/Moony/blob/main/Moony.ps1) and work with your own shortcut)
+For fiddlers: feel free to download [Moony.ps1](https://github.com/couleur-tweak-tips/Moony/blob/main/Moony.ps1) and work with your own shortcut
