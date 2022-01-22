@@ -1,11 +1,11 @@
 ## 🌙 **Moony**, an unlocked third-party [Lunar Client](https://lunarclient.com) launcher
 
-### **At launch**
+### 🚀 **At launch**
 * Choose the version directly, no need to launch then have to ``Click to view launch options``
 * Select a server that will be joined automatically when Minecraft finishes launching
 * Select an account to switch to at launch
 * Doesn't get in your way, you can type your command and go back to whatever you were doing while it launches
-### **Unlocked features**
+### 🔓**Unlocked features**
 * You get to choose when to update, (e.g a controversial update happens) Lunar Client's official launcher phones home every time you launch it
 * Make Minecraft significantly more stable (1.8+) with a custom JRE (GraalVM, learn more at [CTT](http://dsc.gg/CTT))
 * Make your own shortened version/server/account combos to quickly (e.g you could make typing `mn MyPreset` launch 1.8, join eu.minemen.club on account MyPvPAlt123 )
@@ -15,7 +15,7 @@
 ### Moony is ridiculously simple to use, you can just call it from the Run window (Windows+R) as "mn"
 I made it very flexible so you can either type full server IPs / versions or just their shortened nicks (7,8,12,16,17,18)
 
-## Here's a few examples:
+## 🖼 Here's a few examples:
 
 ```
 mn <version> <server> <account> [-Verbose]
@@ -71,7 +71,7 @@ scoop install utils/moony
 ```
 
 
-## Updating
+## ⏬ Updating
 
 ```
 scoop.cmd update utils/moony
