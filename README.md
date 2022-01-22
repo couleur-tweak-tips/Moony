@@ -1,4 +1,4 @@
-## 🌙 **Moony**, an unlocked third-party [Lunar Client](https://lunarclient.com) launcher
+## 🌙 **Moony**: a minimalistic and unlocked third-party [Lunar Client](https://lunarclient.com) launcher
 
 ### 🚀 **At launch**
 * Choose the version directly, no need to launch then have to ``Click to view launch options``
