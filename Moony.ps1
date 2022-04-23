@@ -1,6 +1,5 @@
 # --------------------------------------- FIRST ARG / VERSION EXPANDER ---------------------------------------
-
-$Host.UI.RawUI.WindowTitle = "Moony [0.3]"
+$Host.UI.RawUI.WindowTitle = "Moony [0.5]"
 
 switch ($args[0]){ # Argument 1: Version
 
@@ -19,24 +18,19 @@ switch ($args[0]){ # Argument 1: Version
     {$_ -eq 'f'}{$script:server = 'eu.minemen.club';$script:ver = 1.7;$account = 'Couleur'}
         # If you want to make your own fast preset, you can add it here to set a server IP, version and account
         # I recommend just making it one letter so it's faster to type, you'll get blazing fast muscle memory in no time
-
+    {$_ -in ('pika','pk')}{$script:server = 'play.pika-network.net';$script:ver = 1.8}
+    {$_ -in ('em')}{$script:server = 'eu.minemen.club';$script:ver = 1.7}
+    {$_ -in ('nl')}{$script:server = 'na.lunar.gg';$script:ver = 1.7}
+    {$_ -in ('hy')}{$script:server = 'hypixel.net';$script:ver = 1.8}
     {$_ -in 'e','edit','conf','config','settings'}{
 
-        # s/o yanderedev, this tries VSCode, Sublime Text, Notepad++ then falls back to notepad
+        $Assoc = (Get-ItemProperty REGISTRY::HKEY_CLASSES_ROOT\Microsoft.PowerShellScript.1\Shell\Open\Command).'(default)'
 
-        if (Get-Command code -ErrorAction Ignore){
-            $TextEditor = (Get-Command code -ErrorAction Ignore).Source
-        }elseif(Get-Command subl.exe -ErrorAction Ignore){
-            $TextEditor = (Get-Command subl.exe -ErrorAction Ignore).Source
-        }elseif(Test-Path "${env:ProgramFiles(x86)}\Notepad++\notepad++.exe"){
-            $TextEditor = "${env:ProgramFiles(x86)}\Notepad++\notepad++.exe"
-        }elseif(Get-Command notepad++.exe -ErrorAction Ignore){
-            $TextEditor = (Get-Command notepad++.exe -ErrorAction Ignore).Source
+        if ($Assoc -notlike "*powershell.exe*"){
+            Invoke-Item $MyInvocation.MyCommand.Path
         }else{
-            $TextEditor = (Get-Command notepad.exe).Source
+            notepad.exe $MyInvocation.MyCommand.Path
         }
-
-        & $TextEditor `"$($MyInvocation.MyCommand.Path)`"
         exit
     }
 
@@ -98,6 +92,7 @@ switch ($args[1]){ # Argument 2: Server IP
 
     #miscellaneous
     {$_ -in ('h','hy','hypixel','hypixel.net')}{$script:server = 'hypixel.net'}
+    {$_ -in ('mana','manacube')}{$script:server = 'play.manacube.com'}
     {$_ -in ('pvpdojo','pd')}{$script:server = 'pvpdojo.com'}
     {$_ -in ('viper','viperhcf','vipermc')}{$script:server = 'vipermc.com'}
     {$_ -in ('pvplegacy','pl','pvplegacy.net')}{$script:server = 'pvplegacy.net'}
@@ -271,6 +266,7 @@ $libraries = @(
 '--add-modules jdk.naming.dns'
 '--add-exports jdk.naming.dns/com.sun.jndi.dns=java.naming'
 '-Dlog4j2.formatMsgNoLookups=true' # Fixes that java exploit
+'-Djna.boot.library.path=natives'
 '--add-opens java.base/java.io=ALL-UNNAMED'
 ) -join ' '
 
@@ -285,7 +281,7 @@ $jars = @(
     'lunar-assets-prod-1-optifine.jar'
     'lunar-assets-prod-2-optifine.jar'
     'lunar-assets-prod-3-optifine.jar'
-    'OptiFine.jar'
+    (Get-Item (Convert-Path "$($settings.LCDirectory)\offline\$ver\*OptiFine_*$ver*")).Name | Where-Object {$_ -CLike '*OptiFine*'} # 'C'Like because it's cAsE sEnSiTiVe
 
 ) -join ';'
 
