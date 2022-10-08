@@ -1,17 +1,18 @@
-# --------------------------------------- FIRST ARG / VERSION EXPANDER ---------------------------------------
-$Host.UI.RawUI.WindowTitle = "Moony [0.5]"
+# Settings are at line 114, using Notepad to tune Moony is disrecommended (Notepad++, VSCode ect.. is.)
+$Host.UI.RawUI.WindowTitle = "Moony [0.6]"
 
 switch ($args[0]){ # Argument 1: Version
 
     {$_ -eq 'stop'}{"Stopping Java";Get-Process javaw -Ea Ignore | Stop-Process -Ea Ignore;exit}
     # If often use this to kill Minecraft after debugging
     
-    {$_ -in (7,1.7,1.7.10)}{$script:ver = 1.7}
-    {$_ -in (8,1.8,1.8.9)}{$script:ver = 1.8}
-    {$_ -in (12,1.12,1.12.2)}{$script:ver = 1.12}
-    {$_ -in (16,1.16,1.16.5)}{$script:ver = 1.16}
-    {$_ -in (17,1.17,1.17.1)}{$script:ver = 1.17}
-    {$_ -in ('l','latest',18,1.18)}{$script:ver = 1.18}
+    {$_ -in (7,1.7,1.7.10)}{$script:ver = '1.7'}
+    {$_ -in (8,1.8,1.8.9)}{$script:ver = '1.8'}
+    {$_ -in (12,1.12,1.12.2)}{$script:ver = '1.12'}
+    {$_ -in (16,1.16,1.16.5)}{$script:ver = '1.16'}
+    {$_ -in (17,1.17,1.17.1)}{$script:ver = '1.17'}
+    {$_ -in (18,1.18)}{$script:ver = '1.18'}
+    {$_ -in ('l','latest',19,"1.19")}{$script:ver = '1.19'}
         # $ver is the shortened version name, there's a switch statement that expands the versions later (-7.10,-8.9,-12.2, etc...) 
         # If you're struggling with 1.18 and Lunar updated to 1.18.x that might be why it's not launching
 
@@ -20,6 +21,7 @@ switch ($args[0]){ # Argument 1: Version
         # I recommend just making it one letter so it's faster to type, you'll get blazing fast muscle memory in no time
     {$_ -in ('pika','pk')}{$script:server = 'play.pika-network.net';$script:ver = 1.8}
     {$_ -in ('em')}{$script:server = 'eu.minemen.club';$script:ver = 1.7}
+    {$_ -in ('pg')}{$script:server = 'pvpgym.net';$script:ver = 1.7}
     {$_ -in ('nl')}{$script:server = 'na.lunar.gg';$script:ver = 1.7}
     {$_ -in ('hy')}{$script:server = 'hypixel.net';$script:ver = 1.8}
     {$_ -in 'e','edit','conf','config','settings'}{
@@ -63,6 +65,8 @@ exit
     }
 }
 
+$v_er = $ver.replace('.','_')
+
 if (($args | Select-Object -Last 1) -in ('-v', 'v', '-verbose','verbose')){
     # Sets up Verbose if specified and removes it from args
     $script:Verbose = $true
@@ -73,6 +77,8 @@ if (($args | Select-Object -Last 1) -in ('-v', 'v', '-verbose','verbose')){
 # --------------------------------------- SERVER EXPANDER ---------------------------------------
 
 switch ($args[1]){ # Argument 2: Server IP
+
+    {$_ -in ('pg','pvpgym')}{$script:server = 'pvpgym.net'}
 
     # mmc
     {$_ -in ('eu','eummc','eu.minemen.club','em')}{$script:server = 'eu.minemen.club'}
@@ -128,17 +134,20 @@ $settings = @{
         # Feel free to put a path to your JRE here (it'll automatic detect GraalVM in ProgramData/LC's Zulu of you don't set anything)
         # Remember to surround it by single/double quotes
 
+    Use_Sodium = $True
+        # For newer versions
+
 }
 
 $JVM_Arguments = @( # Non GraalVM arguments
 
-    '-XX:+UseZGC'
+    #'-XX:+UseZGC'
         # Try removing that if your Minecraft tends to freeze / crash, this is an optimized garbage collector
 
     "-Xms$($settings.DedicatedGigaBytesOfRam*1024)m"
     "-Xmx$($settings.DedicatedGigaBytesOfRam*1024)m"
+    "-Djava.library.path=natives" # This needs to be in here for some reason
     '-XX:+DisableAttachMechanism'
-    "-Djava.library.path=$(Join-Path $settings.LCDirectory offline\$ver\natives) " # This needs to be in here for some reason
         
 
 ) -join ' '
@@ -180,7 +189,7 @@ if (-Not($settings.Java_Executable)){ # If you don't set anything up there (by d
     $Temurin = (Get-Command temurin17-javaw.exe -Ea Ignore).Source | Sort-Object -Descending | Select-Object -Last 1
     $GraalVM = Convert-Path "$env:ProgramData\GraalVM\bin\javaw.exe" -ErrorAction Ignore
 
-    $Zulu = Convert-Path "$env:USERPROFILE\.lunarclient\jre\1.*\zulu*-jre*-win_x*\bin\javaw.exe" -Ea Ignore | Sort-Object -Descending | Select-Object -Last 1
+    $Zulu = Convert-Path "$env:USERPROFILE\.lunarclient\jre\*\zulu*-jre*-win_x*\bin\javaw.exe" -Ea Ignore | Sort-Object -Descending | Select-Object -Last 1
     $FallbackJRE = (Get-Command javaw.exe -Ea Ignore).Source | Sort-Object -Descending | Select-Object -First 1
 
     if ($Temurin){$settings.Java_Executable = $Temurin}
@@ -252,11 +261,12 @@ if ($settings.Java_Executable -like "*GraalVM*"){ # Appends these JVM arguments 
 switch ($ver){
     # Fix Asset Index
     1.7{Set-Variable -Name version -Value 1.7.10}
-    1.8{Set-Variable -Name version -Value 1.8}
+    1.8{Set-Variable -Name version -Value 1.8.9}
     1.12{Set-Variable -Name version -Value 1.12}
     1.16{Set-Variable -Name version -Value 1.16}
     1.17{Set-Variable -Name version -Value 1.17}
     1.18{Set-Variable -Name version -Value 1.18}
+    1.19{Set-Variable -Name version -Value 1.19.2}
     default{Write-Warning "Unknown version provided: $ver"
     pause
     exit}
@@ -265,25 +275,33 @@ switch ($ver){
 $libraries = @(
 '--add-modules jdk.naming.dns'
 '--add-exports jdk.naming.dns/com.sun.jndi.dns=java.naming'
-'-Dlog4j2.formatMsgNoLookups=true' # Fixes that java exploit
 '-Djna.boot.library.path=natives'
+'-Dlog4j2.formatMsgNoLookups=true' # Fixes that java exploit
 '--add-opens java.base/java.io=ALL-UNNAMED'
 ) -join ' '
 
 $jars = @(
+    'genesis-0.1.0-SNAPSHOT-all.jar'
+    'common-0.1.0-SNAPSHOT-all.jar'
+    'lunar-lang.jar'
+    'lunar-emote.jar'
+    'lunar.jar'
+    "v$v_er-0.1.0-SNAPSHOT-all.jar"
+)
 
-    # Jars required to make Lunar Client work properly
-    # I'm not indicating paths because I start javaw.exe with the WorkingDirectory in the folders where these files are at
+if ($settings.Use_Sodium -and ([version]$ver -gt [version]1.12)){ # Bless version type
+    Write-Host "Using Sodium" -ForegroundColor DarkRed
+    $jars += @(
+        "fabric-0.1.0-SNAPSHOT-all.jar"
+        "fabric-0.1.0-SNAPSHOT-v$v_er.jar"
+        "argon-0.1.0-SNAPSHOT-all.jar"
+        "sodium-0.1.0-SNAPSHOT-all.jar"
+    )
+}else{
+    Write-Host "Using OptiFine" -ForegroundColor Magenta
+    $jars += 'optifine-0.1.0-SNAPSHOT-all.jar'
 
-    '-cp vpatcher-prod.jar'
-    'lunar-prod-optifine.jar'
-    'lunar-libs.jar'
-    'lunar-assets-prod-1-optifine.jar'
-    'lunar-assets-prod-2-optifine.jar'
-    'lunar-assets-prod-3-optifine.jar'
-    (Get-Item (Convert-Path "$($settings.LCDirectory)\offline\$ver\*OptiFine_*$ver*")).Name | Where-Object {$_ -CLike '*OptiFine*'} # 'C'Like because it's cAsE sEnSiTiVe
-
-) -join ';'
+}
 
 if ($settings.LunarClientCosmetics){
 
@@ -296,18 +314,19 @@ if ($settings.LunarClientCosmetics){
 if(-Not($settings.WindowedHeight)){$settings.WindowedHeight = 480}
 if(-Not($settings.WindowedWidth)){$settings.WindowedWidth = 854}
 
-
 $config = @(
-'com.moonsworth.lunar.patcher.LunarMain'
-"--version $ver"
+"--assetDir $(Join-Path $settings.MinecraftDir assets)"
+"--version $version"
 '--accessToken 0'
 "--assetIndex $version"
 '--userProperties {}'
 "--gameDir $($settings.MinecraftDir)"
 "--texturesDir $texturesDir"
-"--assetDir $(Join-Path $settings.MinecraftDir assets)"
 "--width $($settings.WindowedWidth)"
 "--height $($settings.WindowedHeight)"
+'--workingDirectory .'
+'--classpathDir .'
+"--ichorClassPath $($jars -join ',')"
 )
 
 if ($server){
@@ -318,37 +337,45 @@ if ($server){
 
 You can parse them by launching Lunar Client with the official Launcher and typing this in PowerShell:
 
-(Get-WmiObject Win32_Process -Filter "name = 'javaw.exe'").CommandLine.Split(' ') | Select-Object -Last 8
+(Get-WmiObject Win32_Process -Filter "name = 'javaw.exe'").CommandLine.Split(' ')
 
 #>
 
 $Parameters = @{
 
     FilePath = $settings.Java_Executable
-    WorkingDirectory = Join-Path $settings.LCDirectory offline/$ver
+    WorkingDirectory = Join-Path $settings.LCDirectory offline/multiver
         # Makes it so we don't have to specify a path for each file in $jars
 
-    ArgumentList = @($libraries;$JVM_Arguments;$jars;$config) -join ' '
+    ArgumentList = @(
+        $libraries
+        $JVM_Arguments
+        "-cp", $($jars -join ';')
+        "com.moonsworth.lunar.genesis.Genesis"
+        $config
+    ) -join ' '
     NoNewWindow = $true
 }
 
 if ($Verbose){
-
+    $settings.Java_Executable
+    Write-Host $Parameters.ArgumentList -ForegroundColor DarkGray
+    ($Parameters.ArgumentList -split " ")
     Write-Verbose "JRE"
     $Parameters.FilePath
 
     Write-Verbose "Working Directory"
     $Parameters.WorkingDirectory
-    
+
     Write-Verbose "Libraries"
     $libraries -Split ' '
-    
+
     Write-Verbose "JVM Arguments"
     $JVM_Arguments -Split ' '
 
     Write-Verbose "Agents (split by ;)"
     $jars -Split ';'
-    
+
     Write-Verbose "Config"
     $config
 }
