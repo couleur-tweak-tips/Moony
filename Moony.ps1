@@ -46,6 +46,13 @@ $settings = @{
 
 }
 
+$agents = @(
+# Hey! Add your agents in this multi-line string:
+@"
+
+
+"@)
+
 $Aliases = @{
 	# Feel free to add your own, here's a template (don't forget to add quotation marks at the start and end!):
 	#'region.domain.tld' = @('serv','server')
@@ -157,14 +164,6 @@ exit
 	}
 }
 
-$agents = @(
-# Hey! Add your agents in this multi-line string:
-@"
-
-
-"@
-
-)
 if($acc){
 
 	$file = Convert-Path "$($settings.LCDirectory)\settings\game\accounts.json" -ErrorAction Stop
@@ -367,4 +366,6 @@ Start-Process @Parameters
 if ($settings.Cooldown -ne -1){
 	Start-Sleep $settings.Cooldown
 	exit
+}else{
+	pause
 }
