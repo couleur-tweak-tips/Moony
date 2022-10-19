@@ -146,7 +146,15 @@ switch ($ver){ # Argument 1: Version / Preset
 	{$_ -in 'e','edit','conf','config','settings'}{
 
 		# IF YOU ARE EXPERIENCING ISSUES WITH EDITING MOONY, COMMENT THE LINE BELOW
-		& rundll32.exe shell32.dll,OpenAs_RunDLL $MyInvocation.MyCommand.Path
+		if (!$isLinux -or !$isMacOS){
+			& rundll32.exe shell32.dll,OpenAs_RunDLL $MyInvocation.MyCommand.Path
+		}else{
+			if (!$EDITOR){
+				Write-Host "EDITOR environment variable not set, open it yourself:`n$($MyInvocation.MyCommand.Path)"
+			}else{
+				& $($EDITOR) $($MyInvocation.MyCommand.Path)
+			}
+		}
 		# AND UNCOMMENT THIS BLOCK OF 6 LINES BELOW
 		# $Assoc = (Get-ItemProperty REGISTRY::HKEY_CLASSES_ROOT\Microsoft.PowerShellScript.1\Shell\Open\Command).'(default)'
         # if ($Assoc -notlike "*powershell.exe*"){
