@@ -17,8 +17,6 @@ $settings = @{
 	JVM_Arguments = @(
 	"-Xms$($DedicatedGigaBytesOfRam*1024)m"
 	"-Xmx$($DedicatedGigaBytesOfRam*1024)m"
-	"-XX:+UseLargePages"
-	"-Xlog:gc+init"
 	"-XX:+DisableAttachMechanism"
 	)-join' '
 
@@ -29,7 +27,7 @@ $settings = @{
 
 	LCDirectory = "$HOME/.lunarclient"
 		# You most likely won't need to change this since Lunar Client does not allow you to change their install directory, still adding this for the smart LFL/PL fellas
-    MinecraftDir = if (!$IsLinux){"$env:APPDATA/.minecraft"} else {"$HOME/.minecraft"}
+    MinecraftDir = if (!$IsLinux){Convert-Path "$env:APPDATA/.minecraft"} else {Convert-Path "$HOME/.minecraft"}
     # I've made it equal to an if statement to make it cross platform but you can replace it with a string with quotes like for LCDirectory
 
     Use_Solar = $True
@@ -52,6 +50,16 @@ $agents = @(
 
 
 "@)
+
+if ($settings.Use_Solar){
+    $patcher = "$($settings.LCDirectory)\solartweaks\solar-patcher.jar"
+    $conf = "$($settings.LCDirectory)\solartweaks\config.json"
+    if (Test-Path $patcher, $conf){
+        $agents += @(
+            "-javaagent:$patcher=$conf"
+        )
+    }
+}
 
 $Aliases = @{
 	# Feel free to add your own, here's a template (don't forget to add quotation marks at the start and end!):
@@ -81,6 +89,10 @@ $Aliases = @{
 	'play.rinaorc.com'	= @('rn'	,'rina','rinaorc')
 	'play.craftok.fr'	= @('ct'	,'craftok')
 	'mc.erisium.com'	= @('eri'	,'erisium','erisium.com','mc.erisium.com')
+	'stratus.network'	= @('stratus')
+	'play.wildya.fr'	= @('wildya','wildya.fr')
+	'bawz.eu'			= @('bawz')
+	'conquete.stratus.network'	= @('conquete','conq')
 }
 
 if (!$ver){
@@ -118,11 +130,19 @@ Foreach($ServerAlias in $Aliases.Keys) { # Loops through the hashtable above
 }
 if (!$server){$server = $serv} # If no server was found, use it as the ip to connect to
 
-
-switch ($ver){ # Argument 1: Version / Preset
-	{$_ -eq 'f'}{$server = 'eu.minemen.club';$script:ver = 1.7;$acc = 'Couleur'}
+switch($ver){
 	# Hey reader! If you want to make your own fast preset, you can add it here to set a server IP, version and account
 	# I recommend just making it one letter so it's faster to type, you'll get blazing fast muscle memory in no time
+	{$_ -eq 'f'}{$server = 'eu.minemen.club';$script:ver = 1.7;$acc = 'Couleur'}
+
+	{$_ -in ('pika','pk')}	{$server = 'play.pika-network.net';$script:ver = 1.8}
+	{$_ -in ('em')}			{$server = 'eu.minemen.club';$script:ver = 1.7}
+	{$_ -in ('pg')}			{$server = 'pvpgym.net';$script:ver = 1.7}
+	{$_ -in ('nl')}			{$server = 'na.lunar.gg';$script:ver = 1.7}
+	{$_ -in ('hy')}			{$server = 'hypixel.net';$script:ver = 1.8}
+}
+
+switch ($ver){ # Argument 1: Version / Preset
 
 
 	{$_ -eq 'stop'}{"Stopping Java";Get-Process javaw -Ea Ignore | Stop-Process -Ea Ignore;exit}
@@ -138,11 +158,7 @@ switch ($ver){ # Argument 1: Version / Preset
 	{$_ -in ('latest',19,'1.19')}		{$script:ver = '1.19';	$script:version = '1.19.2'; $indexVer = '1_19'; 	$v_er = '1_19'}
 		# If you're struggling with 1.18 and Lunar updated to 1.18.x that might be why it's not launching
 
-	{$_ -in ('pika','pk')}{$server = 'play.pika-network.net';$script:ver = 1.8}
-	{$_ -in ('em')}{$server = 'eu.minemen.club';$script:ver = 1.7}
-	{$_ -in ('pg')}{$server = 'pvpgym.net';$script:ver = 1.7}
-	{$_ -in ('nl')}{$server = 'na.lunar.gg';$script:ver = 1.7}
-	{$_ -in ('hy')}{$server = 'hypixel.net';$script:ver = 1.8}
+
 	{$_ -in 'e','edit','conf','config','settings'}{
 
 		# IF YOU ARE EXPERIENCING ISSUES WITH EDITING MOONY, COMMENT THE LINE BELOW
@@ -241,18 +257,6 @@ $libraries = @(
 '--add-opens java.base/java.io=ALL-UNNAMED'
 ) -join ' '
 
-
-
-if ($settings.Use_Solar){
-    $patcher = "$($settings.LCDirectory)\solartweaks\solar-patcher.jar"
-    $conf = "$($settings.LCDirectory)\solartweaks\config.json"
-    if (Test-Path $patcher, $conf){
-        $agents += @(
-            "$patcher=$conf"
-        )
-    }
-}
-
 $jars = @(
     'genesis-0.1.0-SNAPSHOT-all.jar'
     'common-0.1.0-SNAPSHOT-all.jar'
@@ -309,7 +313,7 @@ if ($settings.Use_Sodium -and ([version]$ver -gt [version]1.12)){ # Bless versio
 }
 
 if ($server){
-    $config += "-server $server" 
+    $config += "--server $server" 
 }
 
 <# If you wish to add --hwid and --launcherversion:
@@ -339,11 +343,13 @@ $Parameters = @{
     NoNewWindow = $true
 }
 
-if ($settings.Cooldown -eq -1){
-	$Paramters += {Wait = $True}
-}
 if ($agents){
 	$Parameters.ArgumentList += (' ' + $agents -join ' ')
+}
+
+
+if ($settings.Cooldown -eq -1){
+	$Paramters += {Wait = $True}
 }
 
 if ($Verbose){
