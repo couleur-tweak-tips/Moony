@@ -46,19 +46,24 @@ $settings = @{
 
 $agents = @(
 # Hey! Add your agents in this multi-line string:
+# iirc itt needs to be formatted like that:
+# -javaagent:"C:\Users\CL\.lunarclient\solartweaks/solar-patcher.jar"="C:\Users\CL\.lunarclient\solartweaks/config.json"
 @"
 
 
 "@)
 
-if ($settings.Use_Solar){
-    $patcher = "$($settings.LCDirectory)\solartweaks\solar-patcher.jar"
-    $conf = "$($settings.LCDirectory)\solartweaks\config.json"
-    if (Test-Path $patcher, $conf){
-        $agents += @(
-            "-javaagent:$patcher=$conf"
-        )
-    }
+if ($settings.Use_Solar){ # And it should solar tweaks automatically if i did it right
+    $patcher = Resolve-Path "$($settings.LCDirectory)/solartweaks/solar-patcher.jar" -ErrorAction Ignore
+    $conf =  Resolve-Path  "$($settings.LCDirectory)/solartweaks/config.json" -ErrorAction Ignore
+	if ($patcher -and $conf){
+		if (Test-Path $patcher -and Test-Path $conf){
+			$agents += @(
+				"-javaagent:$patcher=$conf"
+			)
+		}
+	}
+
 }
 
 $Aliases = @{
@@ -326,6 +331,11 @@ You can parse them by launching Lunar Client with the official Launcher and typi
 
 $Seperator = if($IsLinux -or $IsMacOS){':'}else{';'}
 
+$agents = $agents -split "`n" -join " "
+if ($agents.trim()){
+	$libraries += (' ' + $agents -join ' ')
+}
+
 $Parameters = @{
 
     FilePath = $JRE
@@ -343,9 +353,7 @@ $Parameters = @{
     NoNewWindow = $true
 }
 
-if ($agents){
-	$Parameters.ArgumentList += (' ' + $agents -join ' ')
-}
+
 
 
 if ($settings.Cooldown -eq -1){
