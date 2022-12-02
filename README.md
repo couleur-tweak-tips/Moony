@@ -48,7 +48,7 @@ I recommend using installing scoop and adding my bucket by pasting the commands 
 This will make automatically add the shortcuts to path and let you update Moony by sending a single [command](#-updating).
 
 ### \# Install scoop:
-```powershell
+```PowerShell
 [System.Net.ServicePointManager]::SecurityProtocol = 'Tls12'
 Set-ExecutionPolicy Bypass -Scope Process -Force
 Invoke-RestMethod https://get.scoop.sh | Invoke-Expression
