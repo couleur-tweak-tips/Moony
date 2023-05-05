@@ -1,3 +1,7 @@
+> **Warning**
+>
+> Moony is deprecated for lack of interest and because Moonsworth keeps making breaking changes. I now use [another client](https://cheatbreaker.net/) and there is [a better alternative to Moony](https://github.com/Moose1301/LunarCli/)
+
 ## 🌙 **Moony**: a minimalistic and unlocked third-party [Lunar Client](https://lunarclient.com) launcher
 
 ### 🚀 **At launch**
